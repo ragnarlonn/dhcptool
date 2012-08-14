@@ -1,0 +1,39 @@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+CC		= @CC@
+CFLAGS		= @CPPFLAGS@ -Wall
+LDFLAGS		= @LDFLAGS@
+BINDIR		= @bindir@
+MANDIR		= @mandir@
+INSTALL		= @INSTALL@
+MKINSTALLDIRS	= @srcdir@/mkinstalldirs
+
+LIBS		= -lpcap -lnet
+
+OBJS		= dhcptool.o
+SRCS		= dhcptool.c
+
+all: dhcptool
+
+dhcptool: ${OBJS}
+	${CC} -o dhcptool ${OBJS} ${LDFLAGS} ${LIBS}
+
+install-bin: dhcptool
+	${MKINSTALLDIRS} ${BINDIR}
+	${INSTALL} dhcptool ${BINDIR}
+
+install-man:
+	${MKINSTALLDIRS} ${MANDIR}/man1
+	${INSTALL} dhcptool.1 ${MANDIR}/man1
+
+install: install-bin install-man
+
+uninstall:
+	rm -f ${BINDIR}/dhcptool
+	rm -f ${MANDIR}/man1/dhcptool.1*
+
+clean:
+	rm -f dhcptool *.o *.core
+
+
+# DO NOT DELETE

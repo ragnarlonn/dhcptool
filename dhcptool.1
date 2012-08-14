@@ -1,0 +1,347 @@
+.\" Copyright (C) 2006 Ragnar Lonn
+.\" This file is part of the dhcptool package
+.\" Author: Ragnar Lonn <dhcptool@gatorhole.com>
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the license agreement specified in the file
+.\" LICENSE, that should have been included in this software package.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" LICENSE file for more details.
+.\"
+.TH dhcptool 1 "June 2006" "dhcptool 0.8b"
+.SH NAME
+dhcptool - generate and transmit custom DHCP/BOOTP packets
+.SH SYNOPSIS
+.B dhcptool
+.BR \-w " DHCP-option"
+.br
+.B dhcptool
+.BI \-i " interface"
+[
+.BI \-o " operation"
+]
+[
+.BI \-S " siaddr"
+]
+[
+.BI \-O " DHCP-opnum=opval[:opval]"
+]
+[
+.BI \-X " DHCP-opnum=opval"
+]
+[
+.BI \-c " ciaddr"
+]
+[
+.BI \-s " secs"
+]
+[
+.BI \-h " chaddr"
+]
+[
+.BI \-x " xid"
+]
+[
+.BI \-f " BOOTP flags"
+]
+[
+.BI \-y " yiaddr"
+]
+[
+.BI \-g " giaddr"
+]
+[
+.BI \-A " servername"
+]
+[
+.BI \-B " filename"
+]
+[
+.BI \-v " verbosity"
+]
+[
+.BI \-t " read-timeout"
+]
+[
+.BI \-F " source-ip"
+]
+[
+.BI \-T " dest-ip"
+]
+[
+.BI \-L " TTL"
+]
+[
+.BI \-Q " tos"
+]
+[
+.BI \-E " dest_mac"
+]
+[
+.BI \-n " reply_cnt"
+]
+[
+.BR \-m
+]
+.br
+.LP
+.SH DESCRIPTION
+.B dhcptool
+generates and transmits customized DHCP/BOOTP packets. Optionally,
+it also waits for a server response, dumping (response) packet
+content to stdout. A decent understanding of the DHCP/BOOTP protocol
+is probably necessary in order to be able to use this tool effectively.
+.B dhcptool
+will make very few attempts to enforce standards as it is intended to
+be used for emulating all kinds of broken DHCP clients. Given the right
+options it can of course perform perfectly valid DHCP transactions also.
+.SH OPTIONS
+.TP
+.BI \-i " interface"
+Specify a network interface to use.
+.TP
+.TP
+.BI \-o " operation"
+DHCP message type (default: "request"). Should be one of "discover", 
+"request", "release", "decline" or "inform". Default is "request".
+.TP
+.BI \-S " siaddr"
+Server IP address BOOTP field. Should be used in a request,
+release, decline or inform message. Default value is 0.0.0.0.
+.TP
+.BI \-O " DHCP-opnum=opval[:opval]"
+Specify a DHCP option. Options are specified as "opnum=opval". E.g.
+to specify DHCP server ID (DHCP option 54) "-O 54=192.168.0.1"
+might be used. The option value is interpreted differently depending
+on what DHCP option is being set. In the case with DHCP option 54
+in the example above, dhcptool will try to interpret the option
+value as an IP address in string format. Multiple option values
+can be specified as "opnum=opval1:opval2:opval3...". I.e. 
+"-O 54=192.168.0.1:192.168.0.2" to specify two DHCP Server Id
+values. See also the -X option, described below.
+.TP
+.BI \-X " DHCP-opnum=opval"
+Specify a DHCP option, using a hex string as option value. E.g.
+to specify DHCP server ID (DHCP option 54), and providing IP
+address 192.168.0.1 as option value, one would use "-X 54=0100a8c0".
+The bytes are reversed to be in network byte order. Every byte is
+represented by two hex characters. The -X option will allow you to 
+specify any data to use as option value for an option, regardless of 
+whether it fits the option type or not. For instance, DHCP option
+52 ("Overload" option) has a boolean type that is represented by
+a single byte which should be 1 or 0. Still, you could craft a
+DHCP packet that set option 52 to have an option value that was
+many bytes in length by doing e.g. "-X 52=00000000" (this 
+option 52 would have its option length set to 4 and the option
+value would be 4 bytes, all zeroed).
+.TP
+.BI \-c " ciaddr"
+Client IP address BOOTP field. Default value is the IP address
+configured on the network interface chosen with the -i option.
+.TP
+.BI \-s " secs"
+"Seconds since client acquisition process began" BOOTP field.
+Default value is 0.
+.TP
+.BI \-h " chaddr"
+Client hardware address, chaddr, BOOTP field. Default is the
+MAC address of the interface specified with -i.
+.TP
+.BI \-x " xid"
+Transaction ID BOOTP field. Default is a random number.
+.TP
+.BI \-f " flags"
+Flags BOOTP field. Default is 0x8000 (broadcast bit set).
+.TP
+.BI \-y " yip"
+Your (client) IP address BOOTP field. Default is 0.0.0.0.
+.TP
+.BI \-g " gip"
+Gateway/relay agent IP address BOOTP field. Default is 0.0.0.0.
+.TP
+.BI \-A " servername"
+Server name string BOOTP field. Default is none.
+.TP
+.BI \-B " filename"
+Client boot file path BOOTP field. Default is none.
+.TP
+.BI \-v " verbosity"
+Verbosity level of dhcptool. 0 = silent. 1 = normal/default
+2 = chatty, 3 = debug.
+.TP
+.BI \-t " timeout"
+Tells 
+.B dhcptool
+to wait
+.IR timeout
+ seconds for any incoming DHCP/BOOTP replies. Default is 0 unless
+"operation" (set using the -o option) is "discover", "request" or
+"inform", in which case the default value for
+.IR timeout
+is 5.
+.TP
+.BI \-F " source_ip"
+"From-address". IPv4 source address to use in outgoing IP packets. 
+Default is the IP address configured on the chosen network interface.
+.TP
+.BI \-T " dest_ip"
+"To-address". IPv4 destination address to use in outgoing 
+IP packets. Default is 255.255.255.255.
+.TP
+.BI \-L " ttl"
+Time-To-Live value to use in outgoing IP packets. Default
+is 64.
+.TP
+.BI \-Q " tos"
+Value to use in IPv4 "tos" field (Type Of Service). Default
+is 0.
+.TP
+.BI \-E " dest_mac"
+Destination MAC address to use in outgoing ethernet packets.
+Default is ff:ff:ff:ff:ff:ff.
+.TP
+.BI \-n " reply_cnt"
+Maximum number of replies to wait for before exiting. Default
+is 0 (unlimited). This parameter takes precedence over the 
+.I timeout
+parameter.
+.TP
+.BI \-m
+Allow multiple definitions of DHCP options. I.e. option 53
+(DHCP message type) can be specified more than once, for those
+who really want to violate standard. The default behaviour of
+.B dhcptool
+is otherwise to complain when an option is specified more
+than once.
+.TP
+.BI \-w " DHCP-option"
+"Whatis". Lookup the specified DHCP option number and give
+a short description of it and its option value data type.
+Example: 
+.RS
+.PP
+# dhcptool -w 54
+.br
+[DHCP Option 54]
+.br
+Description: DHCP Server Id
+.br
+Option data type: 32-bit IPv4 address(es), network byte order
+.RE
+.PP
+.SH EXAMPLES
+.br
+Broadcasting a DHCP DISCOVER request through interface em0, asking
+for parameters 1 (subnet mask), 3 (router), 6 (domain name server)
+and using transaction ID 12345:
+.RS
+.PP
+# dhcptool -i em0 -o discover -x 12345 -O 55=1:3:6
+.br
+DHCP REPLY
+.br
+xid:        12345
+.br
+secs:       0
+.br
+flags:      32768
+.br
+cip:        0.0.0.0
+.br
+yip:        10.103.128.97
+.br
+sip:        0.0.0.0
+.br
+gip:        0.0.0.0
+.br
+chaddr:     00 03 ba 96 7c e8
+.br
+Option 053: 2
+.br
+Option 001: 255.255.254.0
+.br
+Option 003: 10.103.128.1
+.br
+Option 028: 10.103.129.255
+.br
+Option 054: 10.103.128.1
+.br
+Option 006: 10.64.1.253
+.br
+Option 051: 120
+.br
+Option 058: 60
+.br
+Option 059: 105
+.br
+Option 255:
+.RE
+.PP
+Asking server 10.103.128.1 to give us IP address 10.103.128.97 (DHCP option
+50), using the same transaction ID as in the above DISCOVER message:
+.RS
+.PP
+# dhcptool -i em0 -o request -x 12345 -S 10.103.128.1 -O 50=10.103.128.97 -O 55=1:3:6
+.br
+DHCP REPLY
+.br
+xid:        12345
+.br
+secs:       0
+.br
+flags:      32768
+.br
+cip:        0.0.0.0
+.br
+yip:        10.103.128.97
+.br
+sip:        10.103.128.1
+.br
+gip:        0.0.0.0
+.br
+chaddr:     00 03 ba 96 7c e8
+.br
+Option 053: 2
+.br
+Option 001: 255.255.254.0
+.br
+Option 003: 10.103.128.1
+.br
+Option 028: 10.103.129.255
+.br
+Option 054: 10.103.128.1
+.br
+Option 006: 10.64.1.253
+.br
+Option 051: 120
+.br
+Option 058: 60
+.br
+Option 059: 105
+.br
+Option 255:
+.br
+.SH DEPENDENCIES
+.br
+.B
+dhcptool
+is dependent on 
+.BR pcap (3) 
+- http://www.tcpdump.org/ and
+.BR libnet 
+- http://www.packetfactory.net/Projects/Libnet/
+.br
+.SH BUGS
+.br
+Undoubtedly.
+.br
+.SH "SEE ALSO"
+.BR dhcpdump (1),
+.BR dhcp-options (5),
+.BR dhclient (8)
+.LP
+.SH AUTHOR
+Ragnar Lonn <dhcptool@gatorhole.com>.

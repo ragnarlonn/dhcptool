@@ -1,0 +1,7 @@
+DHCPTOOL Change Log
+
+0.8b: - Initial release
+
+0.9b: - Fixed bug that caused program to crash when -c argument was used (oops)
+      - Added CHANGELOG file to distribution
+
