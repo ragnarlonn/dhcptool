@@ -2,3 +2,4 @@ Future development ideas/TODOs
 
 - Add load/performance testing functionality. Make it possible to parallelize execution of dhcptool
 - Include a libnet version in distribution, as its hosting does not seem to be so stable (possibly also include libpcap)
+- Add a listen-only mode?
