@@ -5,3 +5,4 @@ Future development ideas/TODOs
 - Add a listen-only mode?
 - More verbosity levels, more consistent output at different levels
 - more ideas...
+- testing gitolite hooks
