@@ -58,4 +58,4 @@ Option 255:
 ```
 
 ### Dependencies
-dhcptool is dependent on pcap(3) - http://www.tcpdump.org/ and libnet - http://packetfactory.openwall.net/projects/libnet/
+dhcptool is dependent on pcap(3) - http://www.tcpdump.org/ and libnet - https://github.com/sam-github/libnet
