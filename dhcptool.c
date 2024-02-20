@@ -6,6 +6,7 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <netinet/ip.h>
 #include "dhcptool.h"
 #include "dhcp-options.h"
 
@@ -120,9 +121,12 @@ int main(int argc, char **argv) {
   char *arg_ipv4_src, *arg_ipv4_dst, *arg_ipv4_tos, *arg_ipv4_ttl;
   char *arg_reply_count;
 
+  struct timeval tv;
+
   if (argc < 2) usage("too few arguments");
 
-  srandom(time(NULL));
+  gettimeofday(&tv, NULL);
+  srandom(tv.tv_usec);
 
   arg_secs = arg_cip = arg_chaddr = arg_sip = arg_ifname = NULL;
   arg_operation = arg_timeout = arg_xid = arg_flags = arg_yip = NULL;
@@ -191,7 +195,7 @@ int main(int argc, char **argv) {
   /* Set chaddr MAC address */
   if (arg_chaddr != NULL) {
     int len = ETHER_ADDR_LEN;
-    chaddr = libnet_hex_aton((int8_t *)arg_chaddr, &len);
+    chaddr = libnet_hex_aton((const char *)arg_chaddr, &len);
     if (chaddr == NULL) {
       if (verbosity > 0)
         printf("Invalid chaddr MAC address specified (%s)\n", arg_chaddr);
@@ -432,7 +436,7 @@ int main(int argc, char **argv) {
 
   if (arg_ether_dst != NULL) {
     int l = ETHER_ADDR_LEN;
-    ether_dst = libnet_hex_aton((int8_t *)arg_ether_dst, &l);
+    ether_dst = libnet_hex_aton((const char *)arg_ether_dst, &l);
     if (ether_dst == NULL) {
       if (verbosity > 0)
         printf("Error: invalid ethernet destination MAC specified (was: %s)\n",
@@ -466,8 +470,8 @@ int main(int argc, char **argv) {
                          sip,
                          gip,
                          chaddr,
-                         (uint8_t *)sname,
-                         (uint8_t *)fname,
+                         (const char *)sname,
+                         (const char *)fname,
                          dhcp_payload,
                          dhcp_payload_len,
                          lnp,
@@ -726,7 +730,7 @@ void pcap_callback(u_int8_t * userdata,
   int remaining_data, i;
   struct libnet_ethernet_hdr * eth_hdr;
   struct ip * ip_pkt;
-  in_addr_t src_ip, dst_ip;
+  /* in_addr_t src_ip, dst_ip; */
   struct libnet_dhcpv4_hdr * dhcp_hdr;
   struct libnet_udp_hdr * udp_hdr;
 
@@ -756,8 +760,10 @@ void pcap_callback(u_int8_t * userdata,
   }
  
   ip_pkt = (struct ip *)(eth_hdr + 1);
+/*
   src_ip = ntohl(*((in_addr_t *)&(ip_pkt->ip_src)));
   dst_ip = ntohl(*((in_addr_t *)&(ip_pkt->ip_dst)));
+*/
   if (verbosity > 2) {
     printf("Got IP packet from %s ", inet_ntoa(ip_pkt->ip_src));
     printf(" to %s\n", inet_ntoa(ip_pkt->ip_dst));
@@ -917,7 +923,7 @@ void set_defaults() {
   gip = inet_addr("0.0.0.0");
 
   l = ETHER_ADDR_LEN;
-  ether_dst = libnet_hex_aton((int8_t *)"ff:ff:ff:ff:ff:ff", &l);
+  ether_dst = libnet_hex_aton((const char *)"ff:ff:ff:ff:ff:ff", &l);
 
   ipv4_tos = 0;
   ipv4_id = 0;

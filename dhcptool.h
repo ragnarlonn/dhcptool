@@ -1,7 +1,7 @@
 #ifndef _DHCPTOOL_H_
 #define _DHCPTOOL_H_
 
-#define DHCPTOOL_VERSION	"0.9b"
+#define DHCPTOOL_VERSION	"0.9c"
 
 #define SNAPLEN 1550
 
